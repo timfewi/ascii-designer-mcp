@@ -1,0 +1,10 @@
+.direnv/
+.venv/
+result
+result-*
+__pycache__/
+.scratch/
+.ascii-designer/
+.ast-index/
+*.egg-info/
+dist/

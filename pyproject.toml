@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ascii-designer-mcp"
+version = "0.1.0"
+description = "Render Blender 3D scenes as high quality truecolor ASCII animations (wallpapers) via MCP and CLI"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13"
+dependencies = [
+  "fonttools",
+  "mcp",
+  "numpy",
+  "openexr",
+  "pillow",
+]
+
+[project.scripts]
+ascii-designer-mcp = "ascii_designer.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ascii_designer"]
+
+[tool.ruff]
+line-length = 100
+# Blender 5.2 bundles Python 3.13; its scripts share this package.
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "PL", "N"]
+ignore = [
+  "PLR0911", # dispatch functions return from many branches
+  "PLR0912",
+  "PLR0913", # numeric kernels and scene builders take explicit parameters
+  "PLR0917",
+  "PLR0915",
+  "PLR2004", # thresholds are named where they matter
+  "N803",    # math-style argument names
+  "N806",
+]
+
+[tool.basedpyright]
+include = ["src", "tests"]
+# Blender scripts run inside Blender's own Python with bpy, which has no stubs.
+exclude = ["src/ascii_designer/blender/scripts", "**/__pycache__"]
+pythonVersion = "3.13"
+typeCheckingMode = "standard"
+reportMissingModuleSource = false

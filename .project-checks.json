@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "checks": [
+    {
+      "name": "nix-format",
+      "argv": ["nix", "run", "--no-write-lock-file", "path:.#formatter.x86_64-linux", "--", "--ci"],
+      "requires": ["nix"],
+      "timeout_seconds": 120,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "statix",
+      "argv": ["statix", "check", "."],
+      "requires": ["statix"],
+      "timeout_seconds": 120,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "deadnix",
+      "argv": ["deadnix", "--fail", "."],
+      "requires": ["deadnix"],
+      "timeout_seconds": 120,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "ruff-check",
+      "argv": ["ruff", "check", "."],
+      "requires": ["ruff"],
+      "timeout_seconds": 120,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "ruff-format",
+      "argv": ["ruff", "format", "--check", "."],
+      "requires": ["ruff"],
+      "timeout_seconds": 120,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "basedpyright",
+      "argv": ["basedpyright"],
+      "requires": ["basedpyright"],
+      "timeout_seconds": 300,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "unittest",
+      "argv": ["python3", "-W", "error::ResourceWarning", "-m", "unittest", "discover", "-s", "tests", "-t", ".", "-p", "test_*.py"],
+      "requires": ["python3", "ffmpeg"],
+      "timeout_seconds": 600,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "flake-check",
+      "argv": ["nix", "flake", "check", "--no-write-lock-file", "path:."],
+      "requires": ["nix"],
+      "timeout_seconds": 3600,
+      "profiles": ["full"]
+    }
+  ],
+  "watch_ignore": [".direnv", ".ruff_cache", ".scratch", ".venv", "__pycache__", "result", "result-*"]
+}
