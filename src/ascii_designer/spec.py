@@ -216,7 +216,13 @@ def _parse_source(raw: Any, base: Path) -> Source:
         params = raw.get("params") or {}
         if not isinstance(params, dict):
             raise SpecError("source.params must be an object")
-        return Source(kind="preset", preset=name, params=validate_params(name, params))
+        validated = validate_params(name, params)
+        for key in PRESETS[name].path_params():
+            path = _path(validated[key], base)
+            if not path.is_file():
+                raise SpecError(f"preset {name} parameter {key}: file not found: {path}")
+            validated[key] = str(path)
+        return Source(kind="preset", preset=name, params=validated)
     if "params" in raw:
         raise SpecError("source.params applies to presets only")
     path = _path(raw[kind], base)
@@ -369,6 +375,12 @@ def absolutize(data: dict[str, Any], base: Path) -> dict[str, Any]:
         for kind in ("blend", "video", "image"):
             if isinstance(source.get(kind), str):
                 source[kind] = str(_path(source[kind], base))
+        preset = PRESETS.get(source.get("preset", ""))
+        params = source.get("params")
+        if preset is not None and isinstance(params, dict):
+            for key in preset.path_params():
+                if isinstance(params.get(key), str) and params[key]:
+                    params[key] = str(_path(params[key], base))
     style = result.get("style")
     if isinstance(style, dict) and isinstance(style.get("font"), str):
         style["font"] = str(_path(style["font"], base))

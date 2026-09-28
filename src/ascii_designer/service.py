@@ -168,7 +168,17 @@ class Designer:
         source = spec.source
         identity: dict[str, Any]
         if source.kind == "preset":
-            identity = {"preset": source.preset, "params": source.params, "loop": plan.count}
+            assert source.preset is not None
+            files = {
+                key: cache.file_digest(Path(source.params[key]))
+                for key in PRESETS[source.preset].path_params()
+            }
+            identity = {
+                "preset": source.preset,
+                "params": source.params,
+                "files": files,
+                "loop": plan.count,
+            }
         else:
             assert source.path is not None
             identity = {"blend": cache.file_digest(source.path)}

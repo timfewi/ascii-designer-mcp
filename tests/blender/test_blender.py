@@ -6,6 +6,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import numpy as np
+from PIL import Image
+
 from ascii_designer.blender import runner
 from ascii_designer.presets import PRESETS
 from ascii_designer.raster.passes import PassSequence
@@ -64,10 +67,18 @@ class BlenderTests(unittest.TestCase):
         self.assertLess(seam["scene_mean_abs_diff"], 0.5)
 
     def test_every_preset_builds(self) -> None:
+        logo = self.dir / "logo.png"
+        mark = np.zeros((64, 64, 4), dtype=np.uint8)
+        mark[16:48, 16:48] = (40, 120, 255, 255)
+        mark[24:40, 24:40] = (230, 240, 255, 255)
+        Image.fromarray(mark).save(logo)
         for name in PRESETS:
             with self.subTest(preset=name):
                 out = self.dir / f"{name}.blend"
-                Designer().preset_blend(parse_spec(self._spec(name)), out)
+                extra = {}
+                if name == "logo":
+                    extra["source"] = {"preset": "logo", "params": {"image": str(logo)}}
+                Designer().preset_blend(parse_spec(self._spec(name, **extra)), out)
                 self.assertTrue(out.is_file())
                 self.assertEqual(runner.blend_file_version(out), (5, 2))
 

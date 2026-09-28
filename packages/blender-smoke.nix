@@ -5,8 +5,13 @@
   runCommand,
   jq,
   mesa,
+  nixos-icons,
   asciiDesigner,
 }:
+let
+  # A real logo with transparency for the `logo` preset.
+  logo = "${nixos-icons}/share/icons/hicolor/256x256/apps/nix-snowflake.png";
+in
 runCommand "ascii-designer-blender-smoke"
   {
     nativeBuildInputs = [
@@ -22,8 +27,12 @@ runCommand "ascii-designer-blender-smoke"
     ascii-designer-mcp status > "$out/status.json"
     for preset in $(ascii-designer-mcp presets | jq -r '.presets[].name'); do
       echo "building preset $preset"
+      extra=()
+      if [ "$preset" = logo ]; then
+        extra=(--param 'image="${logo}"' --param resolution=128)
+      fi
       ascii-designer-mcp preset-blend "$preset" --size 160x100 --cell 8x16 \
-        --seconds 0.25 --fps 12 --out "$TMPDIR/$preset.blend" > /dev/null
+        --seconds 0.25 --fps 12 "''${extra[@]}" --out "$TMPDIR/$preset.blend" > /dev/null
     done
     ascii-designer-mcp render tunnel --size 160x100 --cell 8x16 --seconds 0.25 --fps 12 \
       --samples 4 --outputs wallpaper,png,ansi -o "$out" --result "$out/result.json" > /dev/null

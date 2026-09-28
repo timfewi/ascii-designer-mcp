@@ -28,7 +28,7 @@ PALETTES: dict[str, tuple[str, str, str, str]] = {
 @dataclass(frozen=True)
 class Param:
     name: str
-    kind: str  # int | float | bool | choice
+    kind: str  # int | float | bool | choice | path
     default: Any
     description: str
     low: float | None = None
@@ -40,9 +40,12 @@ class Param:
             "type": {"int": "integer", "float": "number", "bool": "boolean"}.get(
                 self.kind, "string"
             ),
-            "default": self.default,
             "description": self.description,
         }
+        if self.kind == "path":
+            data["format"] = "path"
+        else:
+            data["default"] = self.default
         if self.low is not None:
             data["minimum"] = self.low
         if self.high is not None:
@@ -62,6 +65,9 @@ class Preset:
 
     def defaults(self) -> dict[str, Any]:
         return {p.name: p.default for p in self.params}
+
+    def path_params(self) -> tuple[str, ...]:
+        return tuple(p.name for p in self.params if p.kind == "path")
 
     def schema(self) -> dict[str, Any]:
         return {
@@ -195,6 +201,28 @@ _PRESET_LIST = (
         ),
     ),
     Preset(
+        "logo",
+        "logo",
+        "Your logo image (PNG/JPG, transparent or plain background) as an embossed "
+        "double-sided 3D emblem; brighter colour regions stand higher.",
+        (
+            Param("image", "path", "", "Logo image file (required)"),
+            _palette("mono"),
+            Param("motion", "choice", "sway", "Animation", choices=("sway", "spin", "float")),
+            Param("thickness", "float", 0.18, "Emblem thickness", 0.02, 1.0),
+            Param("relief", "float", 0.5, "Height difference between colour regions", 0.0, 1.0),
+            Param(
+                "material",
+                "choice",
+                "glossy",
+                "Surface look",
+                choices=("glossy", "metal", "matte", "neon"),
+            ),
+            Param("resolution", "int", 420, "Mesh samples along the long side", 128, 800),
+            Param("turns", "int", 1, "Full turns per loop (spin)", 1, 3),
+        ),
+    ),
+    Preset(
         "attractor",
         "attractor",
         "Strange attractor traced as a tube, slowly orbiting.",
@@ -222,6 +250,9 @@ def validate_params(name: str, params: dict[str, Any]) -> dict[str, Any]:
     result = preset.defaults()
     for key, value in params.items():
         result[key] = _check(name, by_name[key], value)
+    missing = [p for p in preset.path_params() if not result[p]]
+    if missing:
+        raise SpecError(f"preset {name} needs params.{missing[0]} (a file path)")
     return result
 
 
@@ -234,6 +265,10 @@ def _check(preset: str, param: Param, value: Any) -> Any:
     if param.kind == "choice":
         if value not in param.choices:
             raise SpecError(f"{where} must be one of: {', '.join(param.choices)}")
+        return value
+    if param.kind == "path":
+        if not isinstance(value, str) or not value:
+            raise SpecError(f"{where} must be a file path")
         return value
     if isinstance(value, bool) or not isinstance(value, int | float):
         raise SpecError(f"{where} must be a number")

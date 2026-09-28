@@ -107,8 +107,18 @@ Relative paths resolve against the spec file.
 | `metaballs` | Liquid metaballs on periodic paths |
 | `city-flyover` | Endless flight over a procedural skyline |
 | `attractor` | Lorenz, Aizawa or Thomas attractor as a tube |
+| `logo` | Your logo image (PNG/JPG) as an embossed, double-sided 3D emblem that sways, floats or spins |
 
 Palettes: synthwave, matrix, amber, ice, sunset, nord, toxic, mono.
+
+The `logo` preset turns any image into a 3D emblem. The foreground comes from the
+alpha channel or, for opaque images, from the distance to the border colour.
+Brighter colour regions stand higher (`relief`), and the original colours are
+used as texture:
+
+```sh
+just render logo --param 'image="/path/to/logo.png"' --param 'motion="spin"' --param 'palette="ice"'
+```
 
 ## MCP surface
 

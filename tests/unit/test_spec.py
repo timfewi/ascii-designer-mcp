@@ -35,6 +35,20 @@ class SpecTests(unittest.TestCase):
         spec = parse_spec({"source": "galaxy", "style": {"edges": "on"}})
         self.assertEqual(spec.style.edges, "on")
 
+    def test_logo_image_parameter(self) -> None:
+        with self.assertRaisesRegex(SpecError, "needs params.image"):
+            parse_spec({"source": "logo"})
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            (base / "mark.png").write_bytes(b"")
+            spec = parse_spec({"source": {"preset": "logo", "params": {"image": "mark.png"}}}, base)
+            self.assertEqual(spec.source.params["image"], str((base / "mark.png").resolve()))
+            self.assertEqual(spec.source.params["motion"], "sway")
+            with self.assertRaisesRegex(SpecError, "file not found"):
+                parse_spec({"source": {"preset": "logo", "params": {"image": "nope.png"}}}, base)
+            raw = absolutize({"source": {"preset": "logo", "params": {"image": "mark.png"}}}, base)
+            self.assertTrue(Path(raw["source"]["params"]["image"]).is_absolute())
+
     def test_rejects_invalid_values(self) -> None:
         cases = [
             ({"source": "nope"}, "unknown preset"),
