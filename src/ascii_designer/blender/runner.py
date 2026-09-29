@@ -103,24 +103,24 @@ def run_job(
         tail: list[str] = []
         log = log_path.open("w", encoding="utf-8") if log_path else None
         try:
-            process = subprocess.Popen(
+            with subprocess.Popen(
                 argv,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
                 env=env,
-            )
-            assert process.stdout is not None
-            for line in process.stdout:
-                if log:
-                    log.write(line)
-                tail = [*tail[-39:], line.rstrip()]
-                if line.startswith(EVENT_PREFIX):
-                    event = json.loads(line[len(EVENT_PREFIX) :])
-                    events.append(event)
-                    if progress:
-                        progress(event)
-            code = process.wait(timeout=timeout)
+            ) as process:
+                assert process.stdout is not None
+                for line in process.stdout:
+                    if log:
+                        log.write(line)
+                    tail = [*tail[-39:], line.rstrip()]
+                    if line.startswith(EVENT_PREFIX):
+                        event = json.loads(line[len(EVENT_PREFIX) :])
+                        events.append(event)
+                        if progress:
+                            progress(event)
+                code = process.wait(timeout=timeout)
         finally:
             if log:
                 log.close()
