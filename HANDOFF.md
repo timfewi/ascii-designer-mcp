@@ -44,7 +44,19 @@ decisions or verification results change.
 - Not verified: wallpaper playback on a desktop and importing the ASCII Motion
   session in the browser.
 
+- Galaxy loop fix (uncommitted): the preset spun the tilted disc about world Z
+  (Euler `XYZ`), so it tumbled and the loop jumped (seam diff 60). Now `ZXY`, star
+  copies turn with their arm and the core glow has 60 segments; the seam test for
+  `galaxy` (`tests/blender/test_blender.py`) passes, `project-check fast` passed.
+- Not done: the full 24 s render after the fix (6x12 cells, `stars=7000`, 36 fps,
+  `--outputs wallpaper,wallpaper444,png`, about 35 min at nice 19) was stopped on
+  request; `~/Videos/ascii-designer/galaxy-ascii-hq*` is still the old, tumbling
+  render. Wallpaper via `mpvpaper` (nixpkgs 1.9, niri, 1920x1200@144 Hz) not set.
+
 ## Next
+
+- Re-run the galaxy render above, check `seam.seamless`, then play it with
+  `mpvpaper -o "no-audio loop-file=inf hwdec=auto-safe" '*' <video>`.
 
 - Host integration: pin this flake and enable the coding-agent registration
   (server name `ascii_designer`, `ascii-designer-mcp mcp`).

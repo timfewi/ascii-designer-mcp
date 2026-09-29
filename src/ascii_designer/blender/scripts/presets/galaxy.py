@@ -30,11 +30,13 @@ def build(scene, params, ctx):
         layer = "core" if r < 1.2 else ("inner" if r < 3.2 else "outer")
         for k in range(arms):
             a = base + spread + 2 * math.pi * k / arms
+            # Turn each copy with its arm, so the field maps onto itself exactly per loop.
             bmesh.ops.create_icosphere(
                 layers[layer],
                 subdivisions=1,
                 radius=size,
-                matrix=Matrix.Translation((r * math.cos(a), r * math.sin(a), z)),
+                matrix=Matrix.Translation((r * math.cos(a), r * math.sin(a), z))
+                @ Matrix.Rotation(2 * math.pi * k / arms, 4, "Z"),
             )
     colors = {
         "core": (c.mix(accent, (1, 1, 1, 1), 0.5), 12.0),
@@ -51,12 +53,16 @@ def build(scene, params, ctx):
             scene, f"Stars_{name}", bm, c.emissive(name, color, strength), smooth=False
         )
         stars.parent = disc
-    glow = c.uv_sphere(
-        scene, "CoreGlow", 0.45, c.emissive("CoreGlow", c.mix(accent, (1, 1, 1, 1), 0.6), 6.0)
+    glow = c.uv_sphere(  # 60 segments divide evenly by 2..6 arms, so the loop turn is exact
+        scene,
+        "CoreGlow",
+        0.45,
+        c.emissive("CoreGlow", c.mix(accent, (1, 1, 1, 1), 0.6), 6.0),
+        segments=60,
     )
     glow.parent = disc
     glow.scale = (1.0, 1.0, 0.45)
-    disc.rotation_mode = "XYZ"
+    disc.rotation_mode = "ZXY"  # spin about the disc's own axis, then tilt toward the camera
     c.drive(disc, "rotation_euler", f"{math.radians(62)!r}", 0)
     c.drive(disc, "rotation_euler", c.loop_value(frames, 2 * math.pi / arms), 2)
     c.world(scene, (0, 0, 0, 1), 0.0)

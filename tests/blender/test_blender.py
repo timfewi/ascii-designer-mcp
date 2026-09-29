@@ -59,12 +59,17 @@ class BlenderTests(unittest.TestCase):
         self.assertEqual(marker["blender"]["passes"], ["depth", "normal"])
 
     def test_loop_render_is_seamless(self) -> None:
-        result = Designer().render(parse_spec(self._spec("tunnel", outputs=["wallpaper", "png"])))
-        self.assertEqual(result["frames"], 3)
-        self.assertTrue(Path(result["outputs"]["wallpaper"]).is_file())
-        seam = result["seam"]
-        self.assertEqual(seam["glyph_state_mismatch"], 0)
-        self.assertLess(seam["scene_mean_abs_diff"], 0.5)
+        # The galaxy spins about the disc's own axis; a wrong Euler order tumbles it instead.
+        for preset in ("tunnel", "galaxy"):
+            with self.subTest(preset=preset):
+                result = Designer().render(
+                    parse_spec(self._spec(preset, outputs=["wallpaper", "png"]))
+                )
+                self.assertEqual(result["frames"], 3)
+                self.assertTrue(Path(result["outputs"]["wallpaper"]).is_file())
+                seam = result["seam"]
+                self.assertEqual(seam["glyph_state_mismatch"], 0)
+                self.assertLess(seam["scene_mean_abs_diff"], 0.5)
 
     def test_every_preset_builds(self) -> None:
         logo = self.dir / "logo.png"
