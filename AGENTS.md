@@ -6,7 +6,7 @@
   before handoff. Checks are declared in `.project-checks.json` and never run on
   their own.
 - Missing tools or offline dependencies are environment blockers, not failures.
-  Enter the pinned toolchain with `nix develop path:.` (or reload direnv).
+  Enter the pinned toolchain with `nix develop .` (or reload direnv).
   `just lint --json` and `just verify --json` forward options to project-check.
 - Do not stage, commit, push, publish or deploy without explicit authorization.
 
@@ -26,3 +26,8 @@
 - Runtime state lives in `$ASCII_DESIGNER_CACHE` (default
   `~/.cache/ascii-designer`); scratch files belong in the ignored `.scratch/`.
 - Progress checkpoint for multi-session work: `HANDOFF.md`.
+- Flake outputs cover native x86-64 and ARM64 Linux. Fast checks evaluate both
+  without builds; full checks build and render on the native system only.
+- Flakes use Git-index files. Stage authorized new source before evaluating it;
+  keep caches and runtime data outside the index. Package inputs are selected by
+  `nix/source.nix`; update its resource allowlist when adding non-Python assets.

@@ -18,13 +18,13 @@ video / image:   ffmpeg decode
 ## Quick start
 
 ```sh
-nix develop path:.          # or direnv; provides Blender 5.2, ffmpeg, font and checks
+nix develop .              # or direnv; provides Blender 5.2, ffmpeg, font and checks
 just status                 # Blender, ffmpeg encoders, font, cache
 just presets                # built-in scenes, parameters and palettes
 just preview tunnel --frame 40            # one frame → PNG overview + 1:1 crop
 just wallpaper planet                     # 12 s loop → ~/Videos/ascii-designer/planet.mp4
 just render terrain --param style='"solid"' --style charset='"blocks"'
-nix build path:.#default    # packaged CLI: result/bin/ascii-designer-mcp
+nix build .#default        # packaged CLI: result/bin/ascii-designer-mcp
 ```
 
 Play a rendered loop as a Wayland wallpaper, for example with mpvpaper; the
@@ -172,10 +172,10 @@ cached passes.
 ## Development
 
 ```sh
-nix develop path:.
+nix develop .
 just test            # unit + integration (Blender tests skipped)
 just test-blender    # includes real renders
-just lint            # project-check fast: nixfmt, statix, deadnix, ruff, basedpyright, unittest
+just lint            # project-check fast: format/lint, types, unittest, native outputs, sources
 just verify          # project-check full: nix flake check incl. Blender smoke render
 ```
 
@@ -183,6 +183,19 @@ Layout: `src/ascii_designer/{spec,presets,service,cache,jobs,cli,mcp_server}.py`
 `raster/` (glyphs, mapper, edges, colours, compose, passes), `output/` (ffmpeg,
 grid, ansi, asciimotion), `blender/` (runner and the scripts that run inside Blender,
 Python 3.13).
+
+The flake provides native packages, development shells, formatters and checks for
+`x86_64-linux` and `aarch64-linux`. Fast checks evaluate both systems without
+building them. Full checks build the package and render the Blender smoke scene
+on the machine's native system; ARM64 execution needs an ARM64 machine or builder.
+The project-check input is pinned to the shared runner that supports both systems.
+
+Flake commands and Direnv use Git-index files. Stage authorized new source files
+before evaluation. `nix/source.nix` keeps the manifest, README, license and regular
+Python files in `src/` and `tests/`, including the scripts Blender loads at runtime.
+Caches, job state, symlinks and special files are excluded. `project-check fast`
+checks the actual package inventory and verifies that synthetic runtime files
+leave the source store path unchanged while Python edits change it.
 
 ## License
 

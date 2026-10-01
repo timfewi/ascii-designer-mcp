@@ -55,7 +55,7 @@ test-blender:
 
 # Build the Nix package (result/bin/ascii-designer-mcp).
 build:
-    nix build path:.#default
+    nix build .#default
 
 # Run declared fast checks; accepts project-check options such as --json.
 lint *args:

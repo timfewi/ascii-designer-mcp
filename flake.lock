@@ -23,17 +23,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1790359011,
-        "narHash": "sha256-SkuRxGbtFhwXT3zP0iBDLAonfjPX/sqhcT22Sktuzjo=",
+        "lastModified": 1790788690,
+        "narHash": "sha256-c4Y5939qiLEg28dALcAXJmyccbjemhkBQ0fR+RZ8Iwg=",
         "owner": "timfewi",
         "repo": "project-check-nix",
-        "rev": "b4f90cdb9a84bb34d5f51a11d037ce60c56e27bb",
+        "rev": "f70de45d69b9ca9a31f5b9f94e316ac6e43e514e",
         "type": "github"
       },
       "original": {
         "owner": "timfewi",
         "repo": "project-check-nix",
-        "rev": "b4f90cdb9a84bb34d5f51a11d037ce60c56e27bb",
+        "rev": "f70de45d69b9ca9a31f5b9f94e316ac6e43e514e",
         "type": "github"
       }
     },

@@ -3,8 +3,22 @@
   "checks": [
     {
       "name": "nix-format",
-      "argv": ["nix", "run", "--no-write-lock-file", "path:.#formatter.x86_64-linux", "--", "--ci"],
+      "argv": ["nix", "fmt", "--offline", "--no-write-lock-file", "--", "--ci"],
       "requires": ["nix"],
+      "timeout_seconds": 120,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "flake-eval",
+      "argv": ["nix", "flake", "check", "--offline", "--all-systems", "--no-build", "--no-write-lock-file", "."],
+      "requires": ["nix"],
+      "timeout_seconds": 120,
+      "profiles": ["fast"]
+    },
+    {
+      "name": "source-filter",
+      "argv": ["python3", "-I", "-B", "scripts/check_source_filter.py"],
+      "requires": ["python3", "nix"],
       "timeout_seconds": 120,
       "profiles": ["fast"]
     },
@@ -52,7 +66,7 @@
     },
     {
       "name": "flake-check",
-      "argv": ["nix", "flake", "check", "--no-write-lock-file", "path:."],
+      "argv": ["nix", "flake", "check", "--offline", "--no-write-lock-file", "."],
       "requires": ["nix"],
       "timeout_seconds": 3600,
       "profiles": ["full"]

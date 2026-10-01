@@ -33,7 +33,7 @@ decisions or verification results change.
 
 ## Status
 
-- Implemented: spec, 11 presets, Blender runner and pass cache, mapper,
+- Implemented: spec, 12 presets, Blender runner and pass cache, mapper,
   compose, encoders, ANSI, ASCII Motion session export, CLI, MCP server with
   background jobs, Justfile, Nix package and Blender smoke check.
 - Verified: `project-check fast` and `full` (flake check including the Blender
@@ -44,19 +44,49 @@ decisions or verification results change.
 - Not verified: wallpaper playback on a desktop and importing the ASCII Motion
   session in the browser.
 
-- Galaxy loop fix (uncommitted): the preset spun the tilted disc about world Z
+- Galaxy loop fix (commit `327f312`): the preset spun the tilted disc about world Z
   (Euler `XYZ`), so it tumbled and the loop jumped (seam diff 60). Now `ZXY`, star
   copies turn with their arm and the core glow has 60 segments; the seam test for
   `galaxy` (`tests/blender/test_blender.py`) passes, `project-check fast` passed.
-- Not done: the full 24 s render after the fix (6x12 cells, `stars=7000`, 36 fps,
-  `--outputs wallpaper,wallpaper444,png`, about 35 min at nice 19) was stopped on
-  request; `~/Videos/ascii-designer/galaxy-ascii-hq*` is still the old, tumbling
-  render. Wallpaper via `mpvpaper` (nixpkgs 1.9, niri, 1920x1200@144 Hz) not set.
+- Not done: a full-quality render after the fix and desktop wallpaper playback.
+  Render output and local desktop configuration remain outside this repository.
 
 ## Next
 
-- Re-run the galaxy render above, check `seam.seamless`, then play it with
+- Run a full-quality galaxy render, check `seam.seamless`, then play it with
   `mpvpaper -o "no-audio loop-file=inf hwdec=auto-safe" '*' <video>`.
 
 - Host integration: pin this flake and enable the coding-agent registration
   (server name `ascii_designer`, `ascii-designer-mcp mcp`).
+
+## Native Linux outputs and clean package sources — 2026-10-01
+
+The previous flake exported only x86-64 Linux and hardcoded its formatter in the
+fast gate. Packages, shells, formatters and both package/render checks now use
+their selected native platform for x86-64 and ARM64 Linux. The shared project-check
+input moved to `f70de45d`; Nixpkgs and Python dependencies retain their pins.
+
+Reproduced a synthetic bytecode cache entering the previous package source and
+changing its store path. `nix/source.nix` now selects the manifest, README,
+license and regular Python source/test files, including all Blender scripts.
+Git-backed Flake/Direnv commands and matching recipes avoid copying untracked
+workspace state. Authorized new source needs staging before Nix evaluation.
+`scripts/source_filter.nix` and `scripts/check_source_filter.py` verify the real
+package inventories, native check runner composition, and synthetic cache,
+symlink and FIFO exclusions. Source edits must change the source store path;
+cache edits must not.
+
+The declared fast gate passed using cached tools, including pinned Python,
+font, ffmpeg and project-check, without realizing the development shell or
+building a package. It ran 43 tests, with the three opt-in Blender tests skipped,
+and passed types, format/lint, both Linux evaluations and source regressions.
+The installed toolbox and meter executed the presets CLI from the actual
+filtered Nix source: all 12 presets remained available, stdout/stderr and byte
+counts were exact, and the mode-0600 event log contained no command or output
+contents. The tracked-source privacy scan completed with zero findings.
+
+The old local desktop/output notes were replaced with portable pending work;
+the already committed galaxy fix is identified accurately. No full builds,
+Blender renders, ARM64 execution, Git-history audit, Direnv approval or host
+activation were performed. Next: review the remaining canonical tool flakes for
+native platform assumptions and reproducible source inputs.

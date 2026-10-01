@@ -18,14 +18,9 @@ python3Packages.buildPythonApplication {
   version = "0.1.0";
   pyproject = true;
 
-  src = lib.fileset.toSource {
+  src = import ../nix/source.nix {
+    inherit lib;
     root = ../.;
-    fileset = lib.fileset.unions [
-      ../pyproject.toml
-      ../README.md
-      ../src
-      ../tests
-    ];
   };
 
   build-system = [ python3Packages.hatchling ];
