@@ -59,7 +59,8 @@ class BlenderTests(unittest.TestCase):
         self.assertEqual(marker["blender"]["passes"], ["depth", "normal"])
 
     def test_loop_render_is_seamless(self) -> None:
-        # The galaxy spins about the disc's own axis; a wrong Euler order tumbles it instead.
+        # The galaxy spins about the disc's own axis and travels a closed spiral path;
+        # a wrong Euler order tumbles it instead.
         for preset in ("tunnel", "galaxy"):
             with self.subTest(preset=preset):
                 result = Designer().render(

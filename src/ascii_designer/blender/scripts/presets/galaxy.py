@@ -1,4 +1,5 @@
-"""Spiral galaxy of emissive stars; rotates by one arm per loop.
+"""Spiral galaxy of emissive stars; rotates by one arm per loop while it travels
+on an Archimedean spiral path (out and back to the centre, 3 turns per loop).
 
 Stars are generated for one arm and copied with arm-fold symmetry, so turning
 by 2*pi/arms per loop is seamless.
@@ -65,6 +66,12 @@ def build(scene, params, ctx):
     disc.rotation_mode = "ZXY"  # spin about the disc's own axis, then tilt toward the camera
     c.drive(disc, "rotation_euler", f"{math.radians(62)!r}", 0)
     c.drive(disc, "rotation_euler", c.loop_value(frames, 2 * math.pi / arms), 2)
+    # Spiral path in the screen plane: the radius swells 0 -> reach -> 0 (zero speed at the
+    # seam) while the angle makes `turns` full revolutions, so the loop closes exactly.
+    reach, turns = 2.5, 3
+    swell = f"{reach / 2!r} * (1 - cos({c.phase(frames)}))"
+    for axis, trig in ((0, "cos"), (2, "sin")):
+        c.drive(disc, "location", f"{swell} * {trig}({c.phase(frames, turns)})", axis)
     c.world(scene, (0, 0, 0, 1), 0.0)
     c.camera(scene, (0, -13.0, 0.4), (0, 0, 0), lens=36)
     del deep

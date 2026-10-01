@@ -171,7 +171,7 @@ _PRESET_LIST = (
     Preset(
         "galaxy",
         "galaxy",
-        "Spiral galaxy of emissive stars rotating by one arm per loop.",
+        "Spiral galaxy of emissive stars travelling on a spiral path, one arm turn per loop.",
         (
             _palette("sunset"),
             Param("arms", "int", 3, "Spiral arms", 2, 6),
